@@ -33,7 +33,7 @@ setup(
     # There are some restrictions on what makes a valid project name
     # specification here:
     # https://packaging.python.org/specifications/core-metadata/#name
-    name="mkdocs2pdf",  # Required
+    name="WCFORYOU",  # Required
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
     #
@@ -55,13 +55,9 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        "weasyprint",
-        "pyyaml",
-        "markdown",
         "pipenv-setup",
+        "Django"
     ],  entry_points='''
-        [console_scripts]
-        mkdocs2pdf=mkdocs2pdf:main
     '''
     
 )

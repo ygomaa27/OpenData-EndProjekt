@@ -1,0 +1,9 @@
+README.md
+pyproject.toml
+setup.py
+WCFORYOU.egg-info/PKG-INFO
+WCFORYOU.egg-info/SOURCES.txt
+WCFORYOU.egg-info/dependency_links.txt
+WCFORYOU.egg-info/entry_points.txt
+WCFORYOU.egg-info/requires.txt
+WCFORYOU.egg-info/top_level.txt
