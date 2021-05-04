@@ -57,6 +57,7 @@ setup(
     install_requires=[
         "pipenv-setup",
         "Django"
+        
     ],  entry_points='''
     '''
     
