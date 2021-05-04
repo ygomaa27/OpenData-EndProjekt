@@ -15,6 +15,9 @@
     </head>
     <body>
         <h1>WcForYou</h1>
+        {% for wc in data.features %}
+            <p>Name: {{ wc.id}}
+        {% endfor %}
         <div id="mapid"></div>
     </body>
 </html>
