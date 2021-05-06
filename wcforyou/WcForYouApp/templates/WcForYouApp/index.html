@@ -15,8 +15,15 @@
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+      integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+      crossorigin=""
     />
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script
+      src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+      integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+      crossorigin=""
+    ></script>
+
     <link
       rel="stylesheet"
       type="text/css"
@@ -34,20 +41,29 @@
     </nav>
     <div id="mapid"></div>
     <script>
-      var mymap = L.map("mapid").setView([51.505, -0.09], 13);
-      L.tileLayer(
-        "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
-        {
+      var options = {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0,
+      };
+
+      function success(pos) {
+        var mymap = L.map("mapid").setView([pos.coords.latitude, pos.coords.longitude], 12);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution:
-            'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-          maxZoom: 18,
-          id: "mapbox/streets-v11",
-          tileSize: 512,
-          zoomOffset: -1,
-          accessToken:
-            "pk.eyJ1Ijoid2kxOWIwNzIiLCJhIjoiY2tvOXpheW50MG11dzJvcW05dnd5d29vOSJ9.4JZdNh20kN-43vBmWAQhyw",
-        }
-      ).addTo(mymap);
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        }).addTo(mymap);
+
+        var uas_marker = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(mymap);
+        uas_marker.bindPopup("<b>You are here!</b>");
+      }
+
+      function error(err) {
+        console.warn(`ERROR(${err.code}): ${err.message}`);
+      }
+
+      navigator.geolocation.getCurrentPosition(success, error, options);
     </script>
   </body>
 </html>
