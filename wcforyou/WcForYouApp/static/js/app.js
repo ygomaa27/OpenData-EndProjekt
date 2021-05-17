@@ -8,10 +8,10 @@ var marker;
 navigator.geolocation.getCurrentPosition(function (position) {
   center.lat = position.coords.latitude;
   center.lng = position.coords.longitude;
-
+  console.log(center);
   let polygon;
   marker = new H.map.Marker(center, { volatility: true });
-  marker.draggable = true;
+  marker.draggable = false;
   map.addObject(marker);
 
   console.log('updating...')
@@ -86,6 +86,28 @@ const geocoder = platform.getGeocodingService();
 
 window.addEventListener("resize", () => map.getViewPort().resize());
 
+
+//wc daten -> Yasin es geht los!
+
+const data = JSON.parse(document.getElementById('data').textContent);
+data.features.forEach(function(obj){
+   var pos = {
+     lat: obj.geometry.coordinates[1],
+     lng: obj.geometry.coordinates[0]
+   }
+   
+   var svgMarkup = 
+   '<svg width="30" height="30" ' +
+   'xmlns="http://www.w3.org/2000/svg">' +
+   '<rect stroke="white" fill="#1b468d" x="1" y="1" width="21" ' +
+   'height="22" /><text x="12" y="18" font-size="10pt" ' +
+   'font-family="Arial" font-weight="bold" text-anchor="middle" ' +
+   'fill="white">WC</text></svg>';
+
+   var icon = new H.map.Icon(svgMarkup)
+   var newmarker = new H.map.Marker(pos, { icon: icon });
+   map.addObject(newmarker);
+});
 
 //bis hier funktioniert alles!!!
 
