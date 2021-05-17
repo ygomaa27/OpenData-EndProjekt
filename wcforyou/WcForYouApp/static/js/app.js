@@ -3,25 +3,55 @@ var center = {
   lng: 13.3777,
 };
 
+var marker;
+
 navigator.geolocation.getCurrentPosition(function (position) {
   center.lat = position.coords.latitude;
   center.lng = position.coords.longitude;
 
   let polygon;
-  const marker = new H.map.Marker(center, { volatility: true });
+  marker = new H.map.Marker(center, { volatility: true });
   marker.draggable = true;
   map.addObject(marker);
 
   console.log('updating...')
 
    //Configure the options object
-   const options = {
+   let currentDate = new Date();
+   var options = {
       range: $('#range').value,
       rangeType: $('#distance').checked ? 'distance' : 'time',
       center: marker.getGeometry(),
+      date: toDateInputFormat(currentDate),
+      time: to24HourFormat(currentDate.getHours())
    }
   
   map.setCenter(options.center, true);
+
+   //new field
+
+   requestIsolineShape = options => {
+    var params = {
+       'mode': `fastest;${options.mode};traffic:enabled`,
+       'start': `geo!${options.center.lat},${options.center.lng}`,
+       'range': options.range,
+       'rangetype': 'pedestrian',
+       'departure': `${options.date}T${options.time}:00`,
+    };
+
+    return new Promise((resolve, reject) => {
+      router.calculateIsoline(
+         params,
+         res => {
+            const shape = res.response.isoline[0].component[0].shape.map(z => z.split(','));
+            resolve( shape )
+         },
+         err => reject(err)
+      );
+    })
+    }
+  
+    calculateIsoline();
 });
 
 const hereCredentials = {
@@ -30,6 +60,34 @@ const hereCredentials = {
 
 const $ = (q) => document.querySelector(q);
 const $$ = (qq) => document.querySelectorAll(qq);
+
+//Height calculations
+const height =
+$("#content-group-1").clientHeight || $("#content-group-1").offsetHeight;
+$(".content").style.height = height + "px";
+
+const platform = new H.service.Platform({ apikey: hereCredentials.apikey });
+const defaultLayers = platform.createDefaultLayers();
+const map = new H.Map(
+  document.getElementById("map"),
+  defaultLayers.vector.normal.map,
+  {
+    center,
+    zoom: 17,
+    pixelRatio: window.devicePixelRatio || 1,
+  }
+);
+const behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+const provider = map.getBaseLayer().getProvider();
+
+//Initialize router and geocoder
+const router = platform.getRoutingService();
+const geocoder = platform.getGeocodingService();
+
+window.addEventListener("resize", () => map.getViewPort().resize());
+
+
+//bis hier funktioniert alles!!!
 
 function toAMPMFormat(val) {
   val = Number(val);
@@ -70,7 +128,7 @@ function formatRangeLabel(range, type) {
     }
   } else {
     //Distance
-    if (range < 2000) {
+    if (range < 1000) {
       return range + " meters";
     } else {
       const km = range / 1000;
@@ -79,71 +137,25 @@ function formatRangeLabel(range, type) {
   }
 }
 
-//Height calculations
-const height =
-$("#content-group-1").clientHeight || $("#content-group-1").offsetHeight;
-$(".content").style.height = height + "px";
 
-const platform = new H.service.Platform({ apikey: hereCredentials.apikey });
-const defaultLayers = platform.createDefaultLayers();
-const map = new H.Map(
-  document.getElementById("map"),
-  defaultLayers.vector.normal.map,
-  {
-    center,
-    zoom: 17,
-    pixelRatio: window.devicePixelRatio || 1,
-  }
-);
-const behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
-const provider = map.getBaseLayer().getProvider();
-
-//Initialize router and geocoder
-const router = platform.getRoutingService();
-const geocoder = platform.getGeocodingService();
-
-window.addEventListener("resize", () => map.getViewPort().resize());
-
-
-//bis hier funktioniert alles!!!
 
 const isolineMaxRange = {
-  time: 32400, //seconds
-  distance: 80000 //meters
+  time: 600, //seconds -> 10 min
+  distance: 1000 //meters
 }
 
-const requestIsolineShape = options => {
-  const params = {
-     'mode': `fastest;${options.mode};traffic:enabled`,
-     'start': `geo!${options.center.lat},${options.center.lng}`,
-     'range': options.range,
-     'rangetype': options.rangeType,
-     'departure': `${options.date}T${options.time}:00`,
-  };
-
-  return new Promise((resolve, reject) => {
-     router.calculateIsoline(
-        params,
-        res => {
-           const shape = res.response.isoline[0].component[0].shape.map(z => z.split(','));
-           resolve( shape )
-        },
-        err => reject(err)
-     );
-  })
-}
+var requestIsolineShape;
 
 async function calculateIsoline() {
-  console.log('updating...')
-
   //Configure the options object
+  let currentDate = new Date();
   const options = {
-     mode: $('#car').checked ? 'car' : $('#pedestrian').checked ? 'pedestrian' : 'truck',
-     range: $('#range').value,
-     rangeType: $('#distance').checked ? 'distance' : 'time',
-     center: marker.getGeometry(),
-     date: $('#date-value').value === '' ? toDateInputFormat(new Date()) : $('#date-value').value,
-     time: to24HourFormat($('#hour-slider').value)
+    mode: 'pedestrian',
+    range:  $('#range').value,
+    rangeType: $('#distance').checked ? 'distance' : 'time',
+    center: marker.getGeometry(),
+    date: toDateInputFormat(currentDate),
+    time: to24HourFormat(currentDate.getHours())
   }
 
   //Limit max ranges
