@@ -2,68 +2,197 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>WcForYouApp</title>
-    <meta name="description" content="" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
-    />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-      integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
-      crossorigin=""
-    />
-    <script
-      src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
-      integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
-      crossorigin=""
-    ></script>
+    <title>WcForYou</title>
 
+    <!-- Style -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/sidebar.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/search.css' %}" />
+
+    <!-- JS API -->
     <link
       rel="stylesheet"
       type="text/css"
-      href="{% static 'WcForYouApp/main.css' %}"
+      href="https://js.api.here.com/v3/3.1/mapsjs-ui.css"
     />
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
+
+    <!-- Turf for area calculations -->
+    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+
+    <!-- Date -->
+    <script src="https://unpkg.com/better-dom@4.0.0/dist/better-dom.min.js"></script>
+    <script src="https://unpkg.com/better-dateinput-polyfill@3.2.7/dist/better-dateinput-polyfill.min.js"></script>
   </head>
+
   <body>
-    <nav>
-      <div class="nav-wrapper">
-        <a href="#" class="brand-logo">Logo</a>
-        <ul id="nav-mobile" class="right hide-on-med-and-down">
-          <li><a href="#">WcForYouApp</a></li>
-        </ul>
+    <div id="map"></div>
+    <div id="sidebar">
+      <div class="gradient-line"></div>
+      <div class="header">
+        <h1>Welcome to WcForYou</h1>
+        <p>
+          All the restroom in you area!
+        </p>
       </div>
-    </nav>
-    <div id="mapid"></div>
-    <script>
-      var options = {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0,
-      };
+      <div class="tabs">
+        <div class="tab-container">
+          <div class="tab tab-active" id="tab-1">Isoline Options</div>
+          <div class="tab" id="tab-2">Display Options</div>
+        </div>
+        <div class="tab-bar"></div>
+      </div>
 
-      function success(pos) {
-        var mymap = L.map("mapid").setView([pos.coords.latitude, pos.coords.longitude], 12);
+      <div class="content">
+        <div class="content-group" id="content-group-1">
+          <div class="group">
+            <div class="h2-row">
+              <h2>Range</h2>
+              <div id="slider-val" class="h2-val"></div>
+            </div>
+            <input
+              class="isoline-controls slider"
+              id="range"
+              type="range"
+              min="0"
+              max="500"
+              value="50"
+            />
+          </div>
+          <div class="group columns">
+            <div class="col">
+              <h2>Mode</h2>
+              <label class="radio-container">
+                <input
+                  class="isoline-controls"
+                  type="radio"
+                  id="car"
+                  name="mode"
+                  checked
+                />
+                <span class="checkmark"></span>
+                Car
+              </label>
+              <label class="radio-container">
+                <input
+                  class="isoline-controls"
+                  type="radio"
+                  id="pedestrian"
+                  name="mode"
+                />
+                <span class="checkmark"></span>
+                Pedestrian
+              </label>
+              <label class="radio-container">
+                <input
+                  class="isoline-controls"
+                  type="radio"
+                  id="truck"
+                  name="mode"
+                />
+                <span class="checkmark"></span>
+                Truck
+              </label>
+            </div>
+            <div class="col">
+              <h2>Range type</h2>
+              <label class="radio-container">
+                <input
+                  class="isoline-controls"
+                  type="radio"
+                  id="time"
+                  name="range-type"
+                  checked
+                />
+                <span class="checkmark"></span>
+                Time
+              </label>
+              <label class="radio-container">
+                <input
+                  class="isoline-controls"
+                  type="radio"
+                  id="distance"
+                  name="range-type"
+                />
+                <span class="checkmark"></span>
+                Distance
+              </label>
+            </div>
+          </div>
 
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        }).addTo(mymap);
+          <div class="group">
+            <h2>Date</h2>
+            <input
+              class="isoline-controls text-input"
+              id="date-value"
+              type="date"
+              name="date"
+            />
+          </div>
 
-        var uas_marker = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(mymap);
-        uas_marker.bindPopup("<b>You are here!</b>");
-      }
+          <div class="group">
+            <div class="h2-row">
+              <h2>Time</h2>
+              <div id="hour-slider-val" class="h2-val"></div>
+            </div>
+            <div class="graph-container">
+              <div class="no-graph-text">
+                Distribution is only available in range type time and mode car.
+              </div>
+              <div class="graph"></div>
+            </div>
+            <input
+              class="isoline-controls slider"
+              id="hour-slider"
+              type="range"
+              min="0"
+              max="23"
+              value="12"
+            />
+          </div>
+        </div>
 
-      function error(err) {
-        console.warn(`ERROR(${err.code}): ${err.message}`);
-      }
+        <div class="content-group" id="content-group-2">
+          <div class="group">
+            <h2>Map Theme</h2>
+            <div class="theme-tiles">
+              <div id="day" class="theme-tile theme-tile-active">
+                <img src="{% static 'resources/day-theme.png' %}"/>
+              </div>
+            </div>
+          </div>
 
-      navigator.geolocation.getCurrentPosition(success, error, options);
-    </script>
+          <div class="group">
+            <h2>Map View</h2>
+            <label class="radio-container">
+              <input
+                class="view-controls"
+                type="radio"
+                id="static"
+                name="map-view"
+                checked
+              />
+              <span class="checkmark"></span>
+              Static top-down
+            </label>
+            <label class="radio-container">
+              <input
+                class="view-controls"
+                type="radio"
+                id="rotating"
+                name="map-view"
+              />
+              <span class="checkmark"></span>
+              Rotating angle
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="{% static 'js/app.js' %}"></script>
   </body>
 </html>
