@@ -123,7 +123,7 @@ data.features.forEach(function(obj){
 
    var icon = new H.map.Icon(svgMarkup);
    var newmarker = new H.map.Marker(pos, { icon: icon });
-   newmarker.setData("<p>lat:"+pos.lat+" - lng: "+pos.lng+"</p>")
+   newmarker.setData("<p>Adresse: "+obj.properties.STRASSE+"\nKategorie :"+obj.properties.KATEGORIE+"\nÖffnungszeiten : "+obj.properties.OEFFNUNGSZEIT+"</p>")
    group.addObject(newmarker);
 });
 
