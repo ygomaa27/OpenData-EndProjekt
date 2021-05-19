@@ -87,7 +87,24 @@ const geocoder = platform.getGeocodingService();
 window.addEventListener("resize", () => map.getViewPort().resize());
 
 
+// create default UI with layers provided by the platform
+const ui = H.ui.UI.createDefault(map, defaultLayers);
+
 //wc daten -> Yasin es geht los!
+
+const group = new H.map.Group();
+map.addObject(group);
+group.addEventListener('tap', function (evt) {
+  // event target is the marker itself, group is a parent event target
+  // for all objects that it contains
+  var bubble = new H.ui.InfoBubble(evt.target.getGeometry(), {
+    // read custom data
+    content: evt.target.getData()
+  });
+  // show info bubble
+  ui.addBubble(bubble);
+}, false);
+
 
 const data = JSON.parse(document.getElementById('data').textContent);
 data.features.forEach(function(obj){
@@ -104,9 +121,10 @@ data.features.forEach(function(obj){
    'font-family="Arial" font-weight="bold" text-anchor="middle" ' +
    'fill="white">WC</text></svg>';
 
-   var icon = new H.map.Icon(svgMarkup)
+   var icon = new H.map.Icon(svgMarkup);
    var newmarker = new H.map.Marker(pos, { icon: icon });
-   map.addObject(newmarker);
+   newmarker.setData("<p>lat:"+pos.lat+" - lng: "+pos.lng+"</p>")
+   group.addObject(newmarker);
 });
 
 //bis hier funktioniert alles!!!
