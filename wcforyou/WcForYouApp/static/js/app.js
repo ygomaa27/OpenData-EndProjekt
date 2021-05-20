@@ -1,3 +1,5 @@
+
+
 var center = {
   lat: 52.5159,
   lng: 13.3777,
@@ -66,7 +68,10 @@ const height =
 $("#content-group-1").clientHeight || $("#content-group-1").offsetHeight;
 $(".content").style.height = height + "px";
 
+
 const platform = new H.service.Platform({ apikey: hereCredentials.apikey });
+// Retrieve the target element for the map:
+var targetElement = document.getElementById('map');
 const defaultLayers = platform.createDefaultLayers();
 const map = new H.Map(
   document.getElementById("map"),
@@ -81,7 +86,7 @@ const behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
 const provider = map.getBaseLayer().getProvider();
 
 //Initialize router and geocoder
-const router = platform.getRoutingService();
+var router = platform.getRoutingService(null, 8);
 const geocoder = platform.getGeocodingService();
 
 window.addEventListener("resize", () => map.getViewPort().resize());
@@ -123,7 +128,7 @@ data.features.forEach(function(obj){
 
    var icon = new H.map.Icon(svgMarkup);
    var newmarker = new H.map.Marker(pos, { icon: icon });
-   newmarker.setData("<p>Adresse: "+obj.properties.STRASSE+"\nKategorie :"+obj.properties.KATEGORIE+"\nÖffnungszeiten : "+obj.properties.OEFFNUNGSZEIT+"</p>")
+   newmarker.setData("<p>Adresse: "+obj.properties.STRASSE+"\nKategorie :"+obj.properties.KATEGORIE+"\nÖffnungszeiten : "+obj.properties.OEFFNUNGSZEIT+"</p> <button id='route_button' onclick='routeToWc("+pos.lat+","+pos.lng+")'>Route  to WC</button>")
    group.addObject(newmarker);
 });
 
@@ -234,4 +239,49 @@ async function calculateIsoline() {
       }
    });
    map.addObject(polygon);
+}
+
+// Create the parameters for the routing request:
+
+
+
+// Define a callback function to process the routing response:
+var onResult = function(result) {
+  // ensure that at least one route was found
+  if (result.routes.length) {
+    result.routes[0].sections.forEach((section) => {
+         // Create a linestring to use as a point source for the route line
+        let linestring = H.geo.LineString.fromFlexiblePolyline(section.polyline);
+
+        // Create a polyline to display the route:
+        let routeLine = new H.map.Polyline(linestring, {
+          style: { strokeColor: 'blue', lineWidth: 3 }
+        });
+
+        
+      
+        // Add the route polyline and the two markers to the map:
+        map.addObjects([routeLine]);
+
+        // Set the map's viewport to make the whole route visible:
+        map.getViewModel().setLookAtData({bounds: routeLine.getBoundingBox()});
+    });
+  }
+};
+
+function routeToWc(lat,lng){
+  var routingParameters = {
+    'routingMode': 'fast',
+    'transportMode': 'pedestrian',
+    // The start point of the route:
+    'origin': center.lat+","+center.lng,//'48.1606776,16.3242066',
+    // The end point of the route:
+    'destination': lat+","+lng,
+    // Include the route shape in the response
+    'return': 'polyline'
+  };
+  router.calculateRoute(routingParameters, onResult,
+    function(error) {
+      alert(error.message);
+    })
 }
