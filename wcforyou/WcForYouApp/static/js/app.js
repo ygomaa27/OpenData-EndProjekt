@@ -21,39 +21,14 @@ navigator.geolocation.getCurrentPosition(function (position) {
    //Configure the options object
    let currentDate = new Date();
    var options = {
-      range: $('#range').value,
-      rangeType: $('#distance').checked ? 'distance' : 'time',
+      range: '900',
+      rangeType: 'distance',
       center: marker.getGeometry(),
       date: toDateInputFormat(currentDate),
       time: to24HourFormat(currentDate.getHours())
    }
-  
+
   map.setCenter(options.center, true);
-
-   //new field
-
-   requestIsolineShape = options => {
-    var params = {
-       'mode': `fastest;${options.mode};traffic:enabled`,
-       'start': `geo!${options.center.lat},${options.center.lng}`,
-       'range': options.range,
-       'rangetype': 'pedestrian',
-       'departure': `${options.date}T${options.time}:00`,
-    };
-
-    return new Promise((resolve, reject) => {
-      router.calculateIsoline(
-         params,
-         res => {
-            const shape = res.response.isoline[0].component[0].shape.map(z => z.split(','));
-            resolve( shape )
-         },
-         err => reject(err)
-      );
-    })
-    }
-  
-    calculateIsoline();
 });
 
 const hereCredentials = {
@@ -132,8 +107,6 @@ data.features.forEach(function(obj){
    group.addObject(newmarker);
 });
 
-//bis hier funktioniert alles!!!
-
 function toAMPMFormat(val) {
   val = Number(val);
   if (val === 0) {
@@ -182,68 +155,46 @@ function formatRangeLabel(range, type) {
   }
 }
 
-
-
-const isolineMaxRange = {
-  time: 600, //seconds -> 10 min
-  distance: 1000 //meters
+var slider = document.getElementById("range");
+var output = document.getElementById("rangevalue");
+output.innerHTML = slider.value;
+slider.oninput = function() {
+  output.innerHTML = this.value;
 }
 
-var requestIsolineShape;
-
-async function calculateIsoline() {
-  //Configure the options object
-  let currentDate = new Date();
-  const options = {
-    mode: 'pedestrian',
-    range:  $('#range').value,
-    rangeType: $('#distance').checked ? 'distance' : 'time',
-    center: marker.getGeometry(),
-    date: toDateInputFormat(currentDate),
-    time: to24HourFormat(currentDate.getHours())
-  }
-
-  //Limit max ranges
-  if (options.rangeType === 'distance') {
-     if (options.range > isolineMaxRange.distance) {
-        options.range = isolineMaxRange.distance
-     }
-     $('#range').max = isolineMaxRange.distance;
-  } else if (options.rangeType == 'time') {
-     if (options.range > isolineMaxRange.time) {
-        options.range = isolineMaxRange.time
-     }
-     $('#range').max = isolineMaxRange.time;
-  }
-
-  //Format label
-  $('#slider-val').innerText = formatRangeLabel(options.range, options.rangeType);
+function routerange(distance){
+  var routingParams = {
+    'mode': 'fastest;pedestrian;',
+    'start': 'geo!'+center.lat+','+center.lng+'',
+    'range': distance,
+    'rangetype': 'distance'
+  };
   
-  //Center map to isoline
-  map.setCenter(options.center, true);
-
-  const linestring = new H.geo.LineString();
-
-   const isolineShape = await requestIsolineShape(options);
-   isolineShape.forEach(p => linestring.pushLatLngAlt.apply(linestring, p));
-
-   if (polygon !== undefined) {
-      map.removeObject(polygon);
-   }
-
-   polygon = new H.map.Polygon(linestring, {
-      style: {
-         fillColor: 'rgba(74, 134, 255, 0.3)',
-         strokeColor: '#4A86FF',
-         lineWidth: 2
-      }
-   });
-   map.addObject(polygon);
+  // Define a callback function to process the isoline response.
+  var onResult = function(result) {
+    var isolineCoords = result.response.isoline[0].component[0].shape;
+    var linestring = new H.geo.LineString();
+  
+    isolineCoords.forEach(function(coords) {
+    linestring.pushLatLngAlt.apply(linestring, coords.split(','));
+    });
+    var isolinePolygon = new H.map.Polygon(linestring);
+    map.addObjects([marker, isolinePolygon]);
+    map.getViewModel().setLookAtData({bounds: isolinePolygon.getBoundingBox()});
+  };
+  
+  // Get an instance of the routing service:
+  var router = platform.getRoutingService();
+  
+  // Call the Routing API to calculate an isoline:
+  router.calculateIsoline(
+    routingParams,
+    onResult,
+    function(error) {
+    alert(error.message);
+    }
+  );
 }
-
-// Create the parameters for the routing request:
-
-
 
 // Define a callback function to process the routing response:
 var onResult = function(result) {
