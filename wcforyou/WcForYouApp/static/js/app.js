@@ -1,5 +1,3 @@
-
-
 var center = {
   lat: 52.5159,
   lng: 13.3777,
@@ -10,7 +8,6 @@ var marker;
 navigator.geolocation.getCurrentPosition(function (position) {
   center.lat = position.coords.latitude;
   center.lng = position.coords.longitude;
-  console.log(center);
   let polygon;
   marker = new H.map.Marker(center, { volatility: true });
   marker.draggable = false;
@@ -70,8 +67,6 @@ window.addEventListener("resize", () => map.getViewPort().resize());
 // create default UI with layers provided by the platform
 const ui = H.ui.UI.createDefault(map, defaultLayers);
 
-//wc daten -> Yasin es geht los!
-
 const group = new H.map.Group();
 map.addObject(group);
 group.addEventListener('tap', function (evt) {
@@ -103,7 +98,10 @@ data.features.forEach(function(obj){
 
    var icon = new H.map.Icon(svgMarkup);
    var newmarker = new H.map.Marker(pos, { icon: icon });
-   newmarker.setData("<p>Adresse: "+obj.properties.STRASSE+"\nKategorie :"+obj.properties.KATEGORIE+"\nÖffnungszeiten : "+obj.properties.OEFFNUNGSZEIT+"</p> <button id='route_button' onclick='routeToWc("+pos.lat+","+pos.lng+")'>Route  to WC</button>")
+   newmarker.setData("<div class='bubblebox'><p>Adresse: "+obj.properties.STRASSE+
+   "\nKategorie :"+obj.properties.KATEGORIE+
+   "\nÖffnungszeiten : "+obj.properties.OEFFNUNGSZEIT+
+   "</p></div><button id='route_button' onclick='routeToWc("+pos.lat+","+pos.lng+")'>Route to WC</button>")
    group.addObject(newmarker);
 });
 
@@ -206,9 +204,7 @@ function routerange(distance){
   );
 }
 
-// Define a callback function to process the routing response:
 var onResult = function(result) {
-  // ensure that at least one route was found
   if (result.routes.length) {
     result.routes[0].sections.forEach((section) => {
          // Create a linestring to use as a point source for the route line
@@ -245,4 +241,49 @@ function routeToWc(lat,lng){
     function(error) {
       alert(error.message);
     })
+}
+
+class MapRotation {
+  constructor(map) {
+     this.map = map;
+     this.interval;
+     this.heading = this.map.getViewModel().getLookAtData().heading;
+  }
+
+  start() {
+     this.map.getViewModel().setLookAtData({
+        tilt: 60,
+        heading: this.heading += 0.015
+     }, true);
+
+     setTimeout(() => {
+        this.interval = setInterval(() => {
+           this.map.getViewModel().setLookAtData({
+              tilt: 60,
+              heading: this.heading += 0.015
+           });
+        }, 10)
+     }, 300)
+  }
+
+  stop() {
+     clearInterval(this.interval);
+     this.map.getViewModel().setLookAtData({
+        tilt: 0,
+        heading: 180
+     }, true);
+  }
+}
+
+const rotation = new MapRotation(map);
+function calculateView() {
+   const options = {
+      theme: 'day',
+      static: $('#static').checked 
+   }
+   if (options.static) {
+      rotation.stop();
+   } else {
+      rotation.start();
+   }
 }
