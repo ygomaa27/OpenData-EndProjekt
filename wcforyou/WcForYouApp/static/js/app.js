@@ -162,6 +162,14 @@ slider.oninput = function() {
   output.innerHTML = this.value;
 }
 
+function removeObjectById(id){
+  for (object of map.getObjects()){
+   if (object.id===id){
+       map.removeObject(object);
+       }
+   }
+}
+
 function routerange(distance){
   var routingParams = {
     'mode': 'fastest;pedestrian;',
@@ -172,6 +180,7 @@ function routerange(distance){
   
   // Define a callback function to process the isoline response.
   var onResult = function(result) {
+    removeObjectById("polyroute");
     var isolineCoords = result.response.isoline[0].component[0].shape;
     var linestring = new H.geo.LineString();
   
@@ -179,6 +188,7 @@ function routerange(distance){
     linestring.pushLatLngAlt.apply(linestring, coords.split(','));
     });
     var isolinePolygon = new H.map.Polygon(linestring);
+    isolinePolygon.id="polyroute";
     map.addObjects([marker, isolinePolygon]);
     map.getViewModel().setLookAtData({bounds: isolinePolygon.getBoundingBox()});
   };
@@ -209,9 +219,9 @@ var onResult = function(result) {
           style: { strokeColor: 'blue', lineWidth: 3 }
         });
 
-        
-      
         // Add the route polyline and the two markers to the map:
+        removeObjectById("route");
+        routeLine.id="route";
         map.addObjects([routeLine]);
 
         // Set the map's viewport to make the whole route visible:
