@@ -80,28 +80,26 @@ group.addEventListener('tap', function (evt) {
   ui.addBubble(bubble);
 }, false);
 
-
-const data = JSON.parse(document.getElementById('data').textContent);
 data.features.forEach(function(obj){
    var pos = {
      lat: obj.geometry.coordinates[1],
      lng: obj.geometry.coordinates[0]
    }
    
-   //var svgMarkup = '<svg width="30" height="30" enable-background="new 0 0 252 435" version="1.1" viewBox="0 0 252 435" xmlns="http://www.w3.org/2000/svg"><switch><foreignObject width="1" height="1" requiredExtensions="http://ns.adobe.com/AdobeIllustrator/10.0/"></foreignObject><g stroke="green"><path d="m169.91 331.57l-0.625 90-74.375-0.625 0.625-89.375s-68.75-20.625-61.875-96.875l195.62 0.625s5.625 74.375-59.375 96.25zm-40.625-119.38c86.25 0 100 15 100 15h-195s8.75-15 95-15zm76.25-55.312h-59.375v45.938h-28.75l0.447-45.938h-67.009c-12.426 0-22.5-10.074-22.5-22.5v-92.813c0-12.426 10.074-22.5 22.5-22.5h154.69c12.426 0 22.5 10.074 22.5 22.5v92.813c-1e-3 12.426-10.075 22.5-22.501 22.5zm4.219-118.59h-47.813l-3.281 6.404s-1.406 6.793-1.406 10.94c0 9.837 8.703 14.531 18.281 14.531s16.406-4.694 16.406-14.531c0-3.854-0.283-7.398-2.309-10.313h20.121v-7.031z" clip-rule="evenodd" fill-rule="evenodd"/></g></switch></svg>';
-   var svgMarkup ='<svg width="30" height="30" ' +
+   var svgMarkup = 
+   '<svg width="30" height="30" ' +
    'xmlns="http://www.w3.org/2000/svg">' +
-   '<rect stroke="white" fill="purple" x="1" y="1" width="21" ' +
+   '<rect stroke="white" fill="#1b468d" x="1" y="1" width="21" ' +
    'height="22" /><text x="12" y="18" font-size="10pt" ' +
    'font-family="Arial" font-weight="bold" text-anchor="middle" ' +
    'fill="white">WC</text></svg>';
 
    var icon = new H.map.Icon(svgMarkup);
    var newmarker = new H.map.Marker(pos, { icon: icon });
-   newmarker.setData("<div class='H_ib_content'><p>Adresse: "+obj.properties.STRASSE+
-   "<br>Kategorie :"+obj.properties.KATEGORIE+
-   "<br>Öffnungszeiten : "+obj.properties.OEFFNUNGSZEIT+
-   "</p></div><button style='margin-left:100px' id='route_button' onclick='routeToWc("+pos.lat+","+pos.lng+")'>Route to WC</button>")
+   newmarker.setData("<div class='bubblebox'><p>Adresse: "+obj.properties.STRASSE+
+   "\nKategorie :"+obj.properties.KATEGORIE+
+   "\nÖffnungszeiten : "+obj.properties.OEFFNUNGSZEIT+
+   "</p></div><button id='route_button' onclick='routeToWc("+pos.lat+","+pos.lng+")'>Route to WC</button>")
    group.addObject(newmarker);
 });
 
