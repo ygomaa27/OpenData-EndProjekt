@@ -59,7 +59,7 @@
   $data = json_decode($content, true);
   ?>
   <script>
-    <?php echo 'var data = ' . json_encode($data) . ';'; ?>
+    <?php echo 'const data = ' . json_encode($data) . ';'; ?>
   </script>
   <script src="static/js/app.js"></script>
 </body>
