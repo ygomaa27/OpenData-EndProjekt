@@ -98,9 +98,9 @@ data.features.forEach(function(obj){
 
    var icon = new H.map.Icon(svgMarkup);
    var newmarker = new H.map.Marker(pos, { icon: icon });
-   newmarker.setData("<div class='H_ib_content'><p>Adresse : "+obj.properties.STRASSE+
-   "<br>Kategorie : "+obj.properties.KATEGORIE+
-   "<br>Öffnungszeiten : "+obj.properties.OEFFNUNGSZEIT+
+   newmarker.setData("<div class='H_ib_content'><p>Adress : "+obj.properties.STRASSE+
+   "<br>Category : "+obj.properties.KATEGORIE+
+   "<br>Opening Hours : "+obj.properties.OEFFNUNGSZEIT+
    "</p></div><button style='margin-left:100px' id='route_button' onclick='routeToWc("+pos.lat+","+pos.lng+")'>Route to WC</button>")
    group.addObject(newmarker);
 });
