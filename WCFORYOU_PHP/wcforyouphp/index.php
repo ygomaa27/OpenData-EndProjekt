@@ -4,11 +4,7 @@
 <head>
   <title>WcForYou</title>
 
-  <!-- Style -->
-  <link rel="stylesheet" type="text/css" href="static/css/index.css" />
-  <link rel="stylesheet" type="text/css" href="static/css/sidebar.css"/>
-  <link rel="stylesheet" type="text/css" href="static/css/search.css" />
-
+  
   <!-- JS API -->
   <link rel="stylesheet" type="text/css" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css" />
   <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
@@ -22,6 +18,12 @@
   <!-- Date -->
   <script src="https://unpkg.com/better-dom@4.0.0/dist/better-dom.min.js"></script>
   <script src="https://unpkg.com/better-dateinput-polyfill@3.2.7/dist/better-dateinput-polyfill.min.js"></script>
+
+  <!-- Style -->
+  <link rel="stylesheet" type="text/css" href="static/css/index.css" />
+  <link rel="stylesheet" type="text/css" href="static/css/sidebar.css"/>
+  <link rel="stylesheet" type="text/css" href="static/css/search.css" />
+
 </head>
 
 <body>
